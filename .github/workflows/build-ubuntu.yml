@@ -1,0 +1,31 @@
+name: Build nwg-dock for Resolute Raccoon
+on: workflow_dispatch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest # GitHub sẽ dùng bản stable mới nhất (hiện là 24.04), gần nhất với 26.04 của bạn
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev libcairo2-dev libgirepository1.0-dev libwayland-dev libglib2.0-dev build-essential pkg-config
+
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+
+      - name: Build binary
+        run: |
+          go mod tidy
+          # Thêm cờ để tối ưu hóa cho máy yếu và đảm bảo tương thích
+          go build -v -ldflags="-s -w" -o nwg-dock-raccoon main.go
+
+      - name: Upload result
+        uses: actions/upload-artifact@v4
+        with:
+          name: my-nwg-dock-raccoon
+          path: nwg-dock-raccoon
